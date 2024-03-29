@@ -1,0 +1,30 @@
+//{
+//   "name": "organizations/44723f5f-55dc-4535-9684-3de893482854/apiKeys/4775bcb9-5c3a-4bd5-bd3e-1909188a7c96",
+//   "principal": "9cb4b246-0e57-51af-80c2-8f37752e20b0",
+//   "principalType": "USER",
+//   "publicKey": "-----BEGIN EC PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOnjhsy3nFV0BiZyo0XaWDQA7oaqU\nIjo5THp4xJWfdUEopI87KdIm1NMkIT8r40nCli4rNRC36BCTy2kcO08EnQ==\n-----END EC PUBLIC KEY-----\n",
+//   "privateKey": "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIPIL0qncCFjCydxekWTGWZ3icsQBiuf0L+BNr1MIgMrjoAoGCCqGSM49\nAwEHoUQDQgAEOnjhsy3nFV0BiZyo0XaWDQA7oaqUIjo5THp4xJWfdUEopI87KdIm\n1NMkIT8r40nCli4rNRC36BCTy2kcO08EnQ==\n-----END EC PRIVATE KEY-----\n",
+//   "createTime": "2024-03-24T01:10:15.394415962Z",
+//   "projectId": "bb952a16-388a-4aa4-bd22-09d2959b3efc",
+//   "nickname": "CoinCheck",
+//   "scopes": [
+//      "rat/portfolio:9cb4b246-0e57-51af-80c2-8f37752e20b0#view",
+//      "rat#view"
+//   ],
+//   "allowedIps": [],
+//   "keyType": "TRADING_KEY",
+//   "enabled": true,
+//   "legacyScopes": [
+//      "wallet:accounts:read",
+//      "wallet:addresses:read",
+//      "wallet:deposits:read",
+//      "wallet:orders:read",
+//      "wallet:payment-methods:read",
+//      "wallet:transactions:read",
+//      "wallet:user:read",
+//      "wallet:withdrawals:read",
+//      "wallet:user:email"
+//   ],
+//   "createdByUserId": "9cb4b246-0e57-51af-80c2-8f37752e20b0",
+//   "createdByUserMongoId": "61d31f8ccab7570b847f562a"
+//}
