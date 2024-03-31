@@ -6,7 +6,6 @@
         public string Username { get; set; }
         public string Email { get; set; }
         public string Ruolo { get; set; }
-        // Aggiungi altri campi che ritieni importanti, escludendo dati sensibili
     }
 
 }

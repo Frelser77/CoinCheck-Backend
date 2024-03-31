@@ -21,6 +21,8 @@ public partial class Utenti
 
     public int? Idabbonamento { get; set; }
 
+    public virtual ICollection<AcquistiAbbonamenti> AcquistiAbbonamentis { get; set; } = new List<AcquistiAbbonamenti>();
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual Abbonamenti? IdabbonamentoNavigation { get; set; }

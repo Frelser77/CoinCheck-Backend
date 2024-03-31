@@ -17,6 +17,8 @@ public partial class CoinCheckContext : DbContext
 
     public virtual DbSet<Abbonamenti> Abbonamentis { get; set; }
 
+    public virtual DbSet<AcquistiAbbonamenti> AcquistiAbbonamentis { get; set; }
+
     public virtual DbSet<Comment> Comments { get; set; }
 
     public virtual DbSet<Criptovalute> Criptovalutes { get; set; }
@@ -51,6 +53,27 @@ public partial class CoinCheckContext : DbContext
             entity.Property(e => e.TipoAbbonamento)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<AcquistiAbbonamenti>(entity =>
+        {
+            entity.HasKey(e => e.AcquistoId).HasName("PK__Acquisti__4F7119543471D2B3");
+
+            entity.ToTable("AcquistiAbbonamenti");
+
+            entity.Property(e => e.AcquistoId).HasColumnName("AcquistoID");
+            entity.Property(e => e.DataAcquisto).HasColumnType("datetime");
+            entity.Property(e => e.DataScadenza).HasColumnType("datetime");
+            entity.Property(e => e.Idprodotto).HasColumnName("IDProdotto");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.IdprodottoNavigation).WithMany(p => p.AcquistiAbbonamentis)
+                .HasForeignKey(d => d.Idprodotto)
+                .HasConstraintName("FK__AcquistiA__IDPro__03F0984C");
+
+            entity.HasOne(d => d.User).WithMany(p => p.AcquistiAbbonamentis)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__AcquistiA__UserI__02FC7413");
         });
 
         modelBuilder.Entity<Comment>(entity =>

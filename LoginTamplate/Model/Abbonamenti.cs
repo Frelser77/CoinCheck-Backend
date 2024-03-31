@@ -17,5 +17,7 @@ public partial class Abbonamenti
 
     public string? ImageUrl { get; set; }
 
+    public virtual ICollection<AcquistiAbbonamenti> AcquistiAbbonamentis { get; set; } = new List<AcquistiAbbonamenti>();
+
     public virtual ICollection<Utenti> Utentis { get; set; } = new List<Utenti>();
 }

@@ -1,4 +1,7 @@
-﻿namespace LoginTamplate.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace LoginTamplate.Model;
 
 public partial class PreferenzeUtente
 {
@@ -16,4 +19,3 @@ public partial class PreferenzeUtente
 
     public virtual Utenti User { get; set; } = null!;
 }
-
