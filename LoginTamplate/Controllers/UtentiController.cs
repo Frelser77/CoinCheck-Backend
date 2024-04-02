@@ -30,22 +30,31 @@ namespace LoginTamplate.Controllers
         public async Task<ActionResult<IEnumerable<UtenteDto>>> GetUtenti()
         {
             var utentiDtoList = await _context.Utentis
-                .Select(u => new UtenteDto
-                {
-                    UserId = u.UserId,
-                    Username = u.Username,
-                    Email = u.Email,
-                    IsActive = u.IsActive,
-                    ImageUrl = u.ImageUrl,
-                    Comments = u.Comments.Select(c => c.Content), // Assumi che Content sia una stringa da mostrare
-                    LogAttivita = u.LogAttivita.Select(la => la.Timestamp.ToString()), // Assumi che Azione sia una stringa da mostrare
-                    Posts = u.Posts.Select(p => p.Title), // Assumi che Title sia una stringa da mostrare
-                    PreferenzeUtentes = u.PreferenzeUtentes.Select(pu => new PreferenzeUtenteDto
-                    {
-                        // Mappa le proprietà necessarie qui
-                    }).ToList()
-                })
-                .ToListAsync();
+        .Include(u => u.PreferenzeUtentes) // Include le preferenze utente
+            .ThenInclude(pu => pu.Cripto) // Include le criptovalute correlate
+        .Select(u => new UtenteDto
+        {
+            UserId = u.UserId,
+            Username = u.Username,
+            Email = u.Email,
+            IsActive = u.IsActive,
+            ImageUrl = u.ImageUrl,
+            Comments = u.Comments.Select(c => c.Content),
+            LogAttivita = u.LogAttivita.Select(la => la.Timestamp.ToString()),
+            Posts = u.Posts.Select(p => p.Title),
+            PreferenzeUtentes = u.PreferenzeUtentes.Select(pu => new PreferenzeUtenteDto
+            {
+                CriptoId = pu.CriptoId,
+                NotificaSogliaPrezzo = pu.NotificaSogliaPrezzo,
+                SogliaPrezzo = pu.SogliaPrezzo,
+                NomeCoin = pu.Cripto.Nome,
+                SimboloCoin = pu.Cripto.Simbolo,
+                PrezzoUsd = pu.Cripto.PrezzoUsd,
+                Variazione24h = pu.Cripto.Variazione24h,
+                Volume24h = pu.Cripto.Volume24h
+            }).ToList()
+        })
+        .ToListAsync();
 
             return utentiDtoList;
         }
@@ -67,13 +76,17 @@ namespace LoginTamplate.Controllers
                     LogAttivita = u.LogAttivita.Select(l => l.Timestamp.ToString()),
                     Posts = u.Posts.Select(p => p.Title),
                     Comments = u.Comments.Select(c => c.Content),
-                    PreferenzeUtentes = u.PreferenzeUtentes
-                        .Select(p => new PreferenzeUtenteDto
-                        {
-                            CriptoId = p.CriptoId,
-                            NotificaSogliaPrezzo = p.NotificaSogliaPrezzo,
-                            SogliaPrezzo = p.SogliaPrezzo
-                        }).ToList()
+                    PreferenzeUtentes = u.PreferenzeUtentes.Select(pu => new PreferenzeUtenteDto
+                    {
+                        CriptoId = pu.CriptoId,
+                        NotificaSogliaPrezzo = pu.NotificaSogliaPrezzo,
+                        SogliaPrezzo = pu.SogliaPrezzo,
+                        NomeCoin = pu.Cripto.Nome,
+                        SimboloCoin = pu.Cripto.Simbolo,
+                        PrezzoUsd = pu.Cripto.PrezzoUsd,
+                        Variazione24h = pu.Cripto.Variazione24h,
+                        Volume24h = pu.Cripto.Volume24h
+                    }).ToList()
                 })
                 .FirstOrDefaultAsync();
 

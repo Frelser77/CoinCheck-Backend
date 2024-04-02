@@ -1,5 +1,6 @@
 ﻿using LoginTamplate.Model;
 using LoginTamplate.Model.Dto.Criptovaluta;
+using LoginTamplate.Model.Dto.Utente;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -97,17 +98,21 @@ namespace LoginTamplate.Controllers
         }
 
         [HttpGet("preferenzeUtente/{userId}")]
-        public async Task<ActionResult<IEnumerable<PreferenzaDto>>> GetPreferenzeUtente(int userId)
+        public async Task<ActionResult<IEnumerable<PreferenzeUtenteDto>>> GetPreferenzeUtente(int userId)
         {
             var preferenzeUtente = await _context.PreferenzeUtentes
                 .Where(p => p.UserId == userId)
                 .Include(p => p.Cripto)
-                .Select(p => new PreferenzaDto
+                .Select(p => new PreferenzeUtenteDto
                 {
-                    PreferenzaId = p.PreferenzaId,
-                    UserId = p.UserId,
                     CriptoId = p.Cripto.CriptoId,
-                    CriptoNome = p.Cripto.Nome
+                    NomeCoin = p.Cripto.Nome,
+                    SimboloCoin = p.Cripto.Simbolo,
+                    PrezzoUsd = p.Cripto.PrezzoUsd,
+                    Variazione24h = p.Cripto.Variazione24h,
+                    Volume24h = p.Cripto.Volume24h,
+                    NotificaSogliaPrezzo = p.NotificaSogliaPrezzo,
+                    SogliaPrezzo = p.SogliaPrezzo
                 })
                 .ToListAsync();
 
