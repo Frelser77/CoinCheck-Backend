@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LoginTamplate.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class UtentiController : ControllerBase
@@ -26,7 +27,7 @@ namespace LoginTamplate.Controllers
 
         // GET: api/Utenti
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Moderatore")]
         public async Task<ActionResult<IEnumerable<UtenteDto>>> GetUtenti()
         {
             var utentiDtoList = await _context.Utentis
@@ -60,8 +61,8 @@ namespace LoginTamplate.Controllers
         }
 
         // GET: api/Utenti/5
+        [Authorize]
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Moderatore,Utente")]
         public async Task<ActionResult<UtenteDto>> GetUtente(int id)
         {
             var utente = await _context.Utentis
@@ -99,8 +100,9 @@ namespace LoginTamplate.Controllers
         }
 
         // PUT: api/Utenti/5
+        [Authorize]
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,Moderatore,Utente")]
+
         public async Task<IActionResult> UpdateUtente(int id, [FromBody] UtentiPutDto utenteDto)
         {
             var utenteToUpdate = await _context.Utentis.FindAsync(id);
@@ -157,8 +159,8 @@ namespace LoginTamplate.Controllers
 
 
         // DELETE: api/Utenti/5
+        [Authorize]
         [HttpPatch("{id}")]
-        [Authorize(Roles = "Admin,Moderatore,Utente")]
         public async Task<IActionResult> SoftDeleteUtente(int id)
         {
             var utente = await _context.Utentis.FindAsync(id);
@@ -182,8 +184,8 @@ namespace LoginTamplate.Controllers
         }
 
         // PATCH: api/Utenti/5/restore
+        [Authorize]
         [HttpPatch("{id}/restore")]
-        [Authorize(Roles = "Admin,Moderatore")]
         public async Task<IActionResult> RestoreUtente(int id)
         {
             var utente = await _context.Utentis.FindAsync(id);
@@ -211,8 +213,9 @@ namespace LoginTamplate.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("upload-image/{id}")]
-        [Authorize(Roles = "Admin,Moderatore,Utente")]
+
         public async Task<IActionResult> UploadProfileImage(int id, [FromForm] IFormFile file)
         {
             // Verifica se l'utente esiste

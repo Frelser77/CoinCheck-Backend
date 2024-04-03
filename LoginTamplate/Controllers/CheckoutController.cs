@@ -1,5 +1,6 @@
 ﻿using LoginTamplate.Model;
 using LoginTamplate.Model.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 
 namespace LoginTamplate.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class CheckoutController : ControllerBase

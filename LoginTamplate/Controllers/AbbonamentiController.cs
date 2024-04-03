@@ -1,10 +1,12 @@
 ﻿using LoginTamplate.Model;
 using LoginTamplate.Model.Dto.Abbonamento;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoginTamplate.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class AbbonamentiController : ControllerBase
@@ -22,6 +24,7 @@ namespace LoginTamplate.Controllers
             var abbonamenti = _context.Abbonamentis.ToList();
             return Ok(abbonamenti);
         }
+        [Authorize(Roles = "Admin,Moderatore")]
         // Aggiungi un nuovo abbonamento
         [HttpPost]
         public async Task<IActionResult> AddAbbonamento([FromBody] Abbonamenti abbonamento)
@@ -31,6 +34,7 @@ namespace LoginTamplate.Controllers
             return CreatedAtAction(nameof(GetAbbonamenti), new { id = abbonamento.Idprodotto }, abbonamento);
         }
 
+        [Authorize(Roles = "Admin,Moderatore")]
         // Modifica un abbonamento esistente
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAbbonamento(int id, [FromBody] AbbonamentoUpdateDTO abbonamentoDTO)
@@ -75,7 +79,7 @@ namespace LoginTamplate.Controllers
             }
             return NoContent();
         }
-
+        [Authorize(Roles = "Admin,Moderatore")]
         // Elimina un abbonamento
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAbbonamento(int id)

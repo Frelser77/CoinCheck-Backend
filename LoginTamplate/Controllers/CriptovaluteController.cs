@@ -1,11 +1,13 @@
 ﻿using LoginTamplate.Model;
 using LoginTamplate.Model.Dto.Criptovaluta;
 using LoginTamplate.Model.Dto.Utente;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoginTamplate.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class CriptovaluteController : ControllerBase
