@@ -15,8 +15,9 @@ namespace LoginTamplate.Controllers
         private readonly IConfiguration _configuration;
         private readonly string _stripeWebhookSecret;
 
-        public CheckoutController(IConfiguration configuration)
+        public CheckoutController(CoinCheckContext context, IConfiguration configuration)
         {
+            _context = context;
             _configuration = configuration;
             _stripeWebhookSecret = _configuration["Stripe:WebhookSecret"];
         }
