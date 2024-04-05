@@ -17,7 +17,13 @@ public partial class Post
 
     public string Title { get; set; } = null!;
 
+    public string? FilePath { get; set; }
+
+    public int? Likes { get; set; }
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public virtual ICollection<Like> LikesNavigation { get; set; } = new List<Like>();
 
     public virtual Utenti User { get; set; } = null!;
 }

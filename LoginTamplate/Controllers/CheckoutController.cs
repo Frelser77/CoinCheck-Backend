@@ -70,6 +70,7 @@ namespace LoginTamplate.Controllers
             return Ok(new { sessionId = session.Id });
         }
 
+        [AllowAnonymous]
         [HttpPost("webhook")]
         public async Task<IActionResult> StripeWebhook()
         {

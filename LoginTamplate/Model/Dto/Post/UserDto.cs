@@ -1,12 +1,10 @@
-﻿namespace LoginTamplate.Model.Dto.Utente
+﻿namespace LoginTamplate.Model.Dto.Post
 {
     public class UserDto
     {
         public int UserId { get; set; }
         public string Username { get; set; }
-        public string Email { get; set; }
-        public string Ruolo { get; set; }
         public string? ImageUrl { get; set; }
+        public string RoleName { get; set; }
     }
-
 }

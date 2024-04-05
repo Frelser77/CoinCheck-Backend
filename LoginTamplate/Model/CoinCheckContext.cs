@@ -23,6 +23,8 @@ public partial class CoinCheckContext : DbContext
 
     public virtual DbSet<Criptovalute> Criptovalutes { get; set; }
 
+    public virtual DbSet<Like> Likes { get; set; }
+
     public virtual DbSet<LogAttivitum> LogAttivita { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
@@ -113,6 +115,24 @@ public partial class CoinCheckContext : DbContext
             entity.Property(e => e.Volume24h).HasColumnType("decimal(18, 2)");
         });
 
+        modelBuilder.Entity<Like>(entity =>
+        {
+            entity.HasKey(e => e.LikeId).HasName("PK__Likes__A2922C142181542D");
+
+            entity.HasOne(d => d.Comment).WithMany(p => p.Likes)
+                .HasForeignKey(d => d.CommentId)
+                .HasConstraintName("FK_Likes_Comments");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.LikesNavigation)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("FK_Likes_Posts");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Likes)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Likes_Users");
+        });
+
         modelBuilder.Entity<LogAttivitum>(entity =>
         {
             entity.HasKey(e => e.LogId).HasName("PK__LogAttiv__5E5499A85D289924");
@@ -132,6 +152,7 @@ public partial class CoinCheckContext : DbContext
             entity.HasKey(e => e.PostId).HasName("PK__Posts__AA1260185D73DA66");
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Likes).HasDefaultValue(0);
             entity.Property(e => e.PostDate).HasColumnType("datetime");
             entity.Property(e => e.Title).HasMaxLength(20);
 

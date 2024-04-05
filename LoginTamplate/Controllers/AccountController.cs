@@ -47,6 +47,7 @@ namespace LoginTamplate.Controllers
                     UserId = user.UserId,
                     Username = user.Username,
                     Email = user.Email,
+                    ImageUrl = user.ImageUrl,
                     logAttivita.Timestamp
                 };
 
@@ -61,9 +62,9 @@ namespace LoginTamplate.Controllers
         {
             var claims = new List<Claim>
     {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
         new Claim(JwtRegisteredClaimNames.Sub, user.Username),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
         new Claim(ClaimTypes.Role, user.Ruolo.NomeRuolo)
         // Altre eventuali claims
     };
@@ -115,7 +116,7 @@ namespace LoginTamplate.Controllers
                 return BadRequest("Username is already taken.");
             }
 
-            string defaultProfileImageUrl = "/upload/profile/placeholder-profile.png\""; // sostituisci con il tuo URL di placeholder
+            string defaultProfileImageUrl = "/uploads/profile/placeholder-profile.png\"";
 
             // Crea un nuovo utente con la password hashata usando BCrypt
             Utenti user = new Utenti

@@ -27,6 +27,8 @@ public partial class Utenti
 
     public virtual Abbonamenti? IdabbonamentoNavigation { get; set; }
 
+    public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+
     public virtual ICollection<LogAttivitum> LogAttivita { get; set; } = new List<LogAttivitum>();
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
