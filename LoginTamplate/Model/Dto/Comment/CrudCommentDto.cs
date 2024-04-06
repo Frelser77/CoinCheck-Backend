@@ -1,6 +1,6 @@
 ﻿namespace LoginTamplate.Model.Dto.Comment
 {
-    public class CreateCommentDto
+    public class CrudCommentDto
     {
         public string Content { get; set; }
     }

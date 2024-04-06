@@ -3,6 +3,7 @@ using LoginTamplate.Model.Dto.Comment;
 using LoginTamplate.Model.Dto.Post;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -70,7 +71,8 @@ namespace LoginTamplate.Controllers
                         User = GetUserDto(l.UserId)
                     }).ToList() : new List<LikeDto>(),
                     UserName = c.User.Username,
-                    UserImage = c.User.ImageUrl
+                    UserImage = c.User.ImageUrl,
+                    RoleName = c.User.Ruolo?.NomeRuolo
                 }).ToList() : new List<CommentDto>(),
             }).ToList();
 
@@ -94,7 +96,7 @@ namespace LoginTamplate.Controllers
         }
 
         [HttpPost("post"), DisableRequestSizeLimit]
-        public async Task<IActionResult> CreatePost([FromForm] CreatePostDto createPostDto)
+        public async Task<IActionResult> CreatePost([FromForm] CrudPostDto createPostDto)
         {
             foreach (var claim in User.Claims)
             {
@@ -150,7 +152,7 @@ namespace LoginTamplate.Controllers
 
         [Authorize]
         [HttpPost("{postId}/comment")]
-        public IActionResult CommentOnPost(int postId, [FromBody] CreateCommentDto createCommentDto)
+        public IActionResult CommentOnPost(int postId, [FromBody] CrudCommentDto createCommentDto)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
@@ -233,9 +235,15 @@ namespace LoginTamplate.Controllers
             }
 
             await _context.SaveChangesAsync();
+            var updatedPost = await _context.Posts.FindAsync(postId);
+            var likeCount = updatedPost?.Likes ?? 0;
 
-            bool isLiked = existingLike == null; // Se existingLike era null, significa che ho aggiunto un mi piace
-            return Ok(new { Message = isLiked ? "Like added" : "Like removed" });
+            bool isLiked = existingLike == null;
+            return Ok(new
+            {
+                Message = isLiked ? "Like added" : "Like removed",
+                LikeCount = likeCount
+            });
         }
 
         [Authorize]
@@ -295,5 +303,129 @@ namespace LoginTamplate.Controllers
             return Ok(commentWithLikes);
 
         }
+
+        [Authorize]
+        [HttpPut("edit/post/{postId}")]
+        public async Task<IActionResult> EditPost(int postId, [FromForm] CrudPostDto editPostDto)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var post = await _context.Posts.FindAsync(postId);
+
+            if (post == null)
+            {
+                return NotFound(new { Message = $"Post con ID {postId} non trovato." });
+            }
+
+            if (post.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Moderatore"))
+            {
+                return Forbid(); // L'utente non ha i permessi per modificare il post
+            }
+
+            // Aggiorna i campi forniti
+            if (!string.IsNullOrEmpty(editPostDto.Title))
+            {
+                post.Title = editPostDto.Title;
+            }
+
+            if (!string.IsNullOrEmpty(editPostDto.Content))
+            {
+                post.Content = editPostDto.Content;
+            }
+
+            if (editPostDto.File != null)
+            {
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(editPostDto.File.FileName);
+                var filePath = Path.Combine("uploads", "posts", fileName);
+
+                // Se esiste, elimina il vecchio file
+                if (!string.IsNullOrEmpty(post.FilePath))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), post.FilePath);
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+
+                // Salva il nuovo file sul server
+                var fileDirectory = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "posts");
+                if (!Directory.Exists(fileDirectory))
+                {
+                    Directory.CreateDirectory(fileDirectory);
+                }
+
+                var fullPath = Path.Combine(fileDirectory, fileName);
+                await using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await editPostDto.File.CopyToAsync(stream);
+                }
+                post.FilePath = filePath;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Post modificato con successo." });
+        }
+
+        [Authorize(Roles = "Admin,Moderatore")]
+        [HttpPut("delete/post/{postId}")]
+        public async Task<IActionResult> SoftDeletePost(int postId)
+        {
+            // Verifica l'esistenza del post prima di tentare la soft delete
+            var postExists = await _context.Posts.AnyAsync(p => p.PostId == postId);
+            if (!postExists)
+            {
+                return NotFound(new { Message = $"Post con ID {postId} non trovato." });
+            }
+
+            // Esegue la stored procedure per la soft delete del post e dei commenti correlati
+            var parameter = new SqlParameter("@PostId", postId);
+            await _context.Database.ExecuteSqlRawAsync("EXEC dbo.SoftDeletePost @PostId", parameter);
+
+            return Ok(new { Message = "Post eliminato con successo." });
+        }
+
+
+        [Authorize]
+        [HttpPut("edit/comment/{commentId}")]
+        public async Task<IActionResult> EditComment(int commentId, [FromBody] CrudCommentDto editCommentDto)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var comment = await _context.Comments.FindAsync(commentId);
+
+            if (comment == null)
+            {
+                return NotFound(new { Message = $"Commento con ID {commentId} non trovato." });
+            }
+
+            if (comment.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Moderatore"))
+            {
+                return Forbid();
+            }
+
+            comment.Content = editCommentDto.Content;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Commento modificato con successo." });
+        }
+
+        [Authorize(Roles = "Admin,Moderatore")]
+        [HttpPut("delete/comment/{commentId}")]
+        public async Task<IActionResult> SoftDeleteComment(int commentId)
+        {
+            // Verifica l'esistenza del commento prima di tentare la soft delete
+            var commentExists = await _context.Comments.AnyAsync(c => c.CommentId == commentId);
+            if (!commentExists)
+            {
+                return NotFound(new { Message = $"Commento con ID {commentId} non trovato." });
+            }
+
+            // Esegue la stored procedure per la soft delete del commento
+            var parameter = new SqlParameter("@CommentId", commentId);
+            await _context.Database.ExecuteSqlRawAsync("EXEC dbo.SoftDeleteComment @CommentId", parameter);
+
+            return Ok(new { Message = "Commento eliminato con successo." });
+        }
+
     }
 }
