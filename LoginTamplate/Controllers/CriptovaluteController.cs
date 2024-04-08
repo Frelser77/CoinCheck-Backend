@@ -98,7 +98,6 @@ namespace LoginTamplate.Controllers
                 return Ok(new { message = "Preferenza aggiunta" });
             }
         }
-
         [HttpGet("preferenzeUtente/{userId}")]
         public async Task<ActionResult<IEnumerable<PreferenzeUtenteDto>>> GetPreferenzeUtente(int userId)
         {
@@ -118,9 +117,10 @@ namespace LoginTamplate.Controllers
                 })
                 .ToListAsync();
 
+            // Se non ci sono preferenze, restituisci un array vuoto
             if (!preferenzeUtente.Any())
             {
-                return NotFound("Nessuna preferenza trovata per l'utente.");
+                return Ok(new List<PreferenzeUtenteDto>());
             }
 
             return Ok(preferenzeUtente);

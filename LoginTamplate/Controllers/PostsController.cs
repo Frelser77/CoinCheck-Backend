@@ -24,15 +24,24 @@ namespace LoginTamplate.Controllers
 
         [Authorize]
         [HttpGet("all")]
-        public IActionResult GetAllPosts()
+        public IActionResult GetAllPosts([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
         {
+            // Calcola il numero di post da saltare
+            int skip = pageIndex * pageSize;
+
+            // Ottieni il totale dei post attivi
+            int totalPosts = _context.Posts.Count(p => p.IsActive);
+
             var postEntities = _context.Posts
-         .Include(p => p.LikesNavigation).ThenInclude(l => l.User)
-         .Include(p => p.User).ThenInclude(u => u.Ruolo)
-         .Include(p => p.Comments).ThenInclude(c => c.User)
-         .Include(p => p.Comments).ThenInclude(c => c.Likes).ThenInclude(l => l.User)
-         .Where(p => p.IsActive)
-         .ToList();
+             .Include(p => p.LikesNavigation).ThenInclude(l => l.User)
+             .Include(p => p.User).ThenInclude(u => u.Ruolo)
+             .Include(p => p.Comments).ThenInclude(c => c.User)
+             .Include(p => p.Comments).ThenInclude(c => c.Likes).ThenInclude(l => l.User)
+             .Where(p => p.IsActive)
+             .OrderBy(p => p.PostDate)
+             .Skip(skip)
+             .Take(pageSize)
+             .ToList();
 
 
             var posts = postEntities.Select(p => new PostDto
@@ -76,7 +85,15 @@ namespace LoginTamplate.Controllers
                 }).ToList() : new List<CommentDto>(),
             }).ToList();
 
-            return Ok(posts);
+            var response = new
+            {
+                Total = totalPosts,
+                Posts = posts,
+                PageIndex = pageIndex,
+                PageSize = posts.Count,
+            };
+
+            return Ok(response);
         }
 
         private UserDto GetUserDto(int userId)
