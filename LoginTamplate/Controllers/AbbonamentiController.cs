@@ -35,7 +35,6 @@ namespace LoginTamplate.Controllers
         }
 
         [Authorize(Roles = "Admin,Moderatore")]
-        // Modifica un abbonamento esistente
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAbbonamento(int id, [FromBody] AbbonamentoUpdateDTO abbonamentoDTO)
         {
@@ -59,7 +58,9 @@ namespace LoginTamplate.Controllers
                 abbonamento.Quantita = abbonamentoDTO.Quantita.Value;
 
             if (!string.IsNullOrWhiteSpace(abbonamentoDTO.ImageUrl))
-                abbonamento.ImageUrl = abbonamentoDTO.ImageUrl;
+            {
+                abbonamento.ImageUrl = $"https://storage.googleapis.com/immagine-abbonamenti/{abbonamentoDTO.ImageUrl}";
+            }
 
             _context.Entry(abbonamento).State = EntityState.Modified;
             try

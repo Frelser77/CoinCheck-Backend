@@ -40,7 +40,7 @@ namespace LoginTamplate.Controllers
                         {
                             Name = item.TipoAbbonamento,
                             Description = item.Descrizione,
-                            //Images = new List<string> { item.ImageUrl },
+                            Images = new List<string> { item.ImageUrl.Replace("uploads/products/", "").Replace("\\", "/") },
                         },
                         UnitAmountDecimal = (long)(item.Prezzo * 100), // Converti il prezzo in centesimi
                     },

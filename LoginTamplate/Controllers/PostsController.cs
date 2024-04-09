@@ -38,7 +38,7 @@ namespace LoginTamplate.Controllers
              .Include(p => p.Comments).ThenInclude(c => c.User)
              .Include(p => p.Comments).ThenInclude(c => c.Likes).ThenInclude(l => l.User)
              .Where(p => p.IsActive)
-             .OrderBy(p => p.PostDate)
+             .OrderByDescending(p => p.PostDate)
              .Skip(skip)
              .Take(pageSize)
              .ToList();
@@ -149,14 +149,20 @@ namespace LoginTamplate.Controllers
                 }
             }
 
+            // Controlla se almeno uno tra Title, Content e File è fornito
+            if (string.IsNullOrEmpty(createPostDto.Title) && string.IsNullOrEmpty(createPostDto.Content) && createPostDto.File == null)
+            {
+                return BadRequest("Almeno uno tra Title, Content e File deve essere fornito.");
+            }
+
             var post = new Post
             {
                 UserId = userId,
-                Content = createPostDto.Content,
-                Title = createPostDto.Title,
+                Content = createPostDto.Content ?? "",
+                Title = createPostDto.Title ?? "",
                 IsActive = true,
                 PostDate = DateTime.UtcNow,
-                FilePath = filePath // Salva solo il nome del file nel DB, non il percorso completo
+                FilePath = filePath
             };
 
             _context.Posts.Add(post);
