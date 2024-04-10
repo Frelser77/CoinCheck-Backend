@@ -1,7 +1,10 @@
-﻿using LoginTamplate.Model;
+﻿using LoginTamplate.Data;
+using LoginTamplate.Model;
+using LoginTamplate.Model.Dto.Email;
 using LoginTamplate.Model.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
 using System.Security.Claims;
@@ -16,17 +19,20 @@ namespace LoginTamplate.Controllers
         private readonly CoinCheckContext _context;
         private readonly IConfiguration _configuration;
         private readonly string _stripeWebhookSecret;
+        private readonly IEmailService _emailService;
 
-        public CheckoutController(CoinCheckContext context, IConfiguration configuration)
+        public CheckoutController(CoinCheckContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _stripeWebhookSecret = _configuration["Stripe:WebhookSecret"];
+            _emailService = emailService;
         }
 
         [HttpPost("create-session")]
         public ActionResult CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest request)
         {
+
             var domain = "http://localhost:5173"; // URL del tuo frontend React
 
             // Crea la lista degli articoli per la sessione di checkout
@@ -138,8 +144,46 @@ namespace LoginTamplate.Controllers
                         _context.Utentis.Update(utente);
                     }
 
+                    var prodotto = await _context.Abbonamentis
+                                     .Where(p => p.Idprodotto == idProdotto)
+                                     .SingleOrDefaultAsync();
+
+                    // Assicurati di avere i dettagli dell'utente e del prodotto
+                    if (prodotto != null && utente != null)
+                    {
+                        // Prepara il corpo dell'email
+                        string imageUrl = prodotto.ImageUrl.Replace("uploads/products/", "").Replace("\\", "/");
+                        string body = $@"
+                                    <html>
+                                    <head>
+                                        <title>Acquisto CoinCheck</title>
+                                    </head>
+                                    <body>
+                                        <p>Ciao {utente.Username},</p>
+                                        <p>Grazie per il tuo acquisto di: <strong>{prodotto.TipoAbbonamento}</strong>.</p>
+                                        <p>Descrizione: {prodotto.Descrizione}.</p>
+                                        <img src='https://storage.googleapis.com/immagine-abbonamenti/{imageUrl}' alt='{prodotto.TipoAbbonamento}' style='max-width:600px;'/><br/>
+                                        <p>La tua sottoscrizione scadrà il: <strong>{dataScadenza.ToString("dd/MM/yyyy")}</strong>.</p>
+                                        <p>Grazie per aver scelto CoinCheck.</p>
+                                    </body>
+                                    </html>";
+
+
+                        // Crea l'email da inviare
+                        EmailDto emailDto = new EmailDto
+                        {
+                            to = utente.Email,
+                            subject = "Dettagli dell'acquisto CoinCheck",
+                            body = body
+                        };
+
+                        // Invia l'email
+                        await _emailService.SendEmailAsync(emailDto);
+                    }
+
                     await _context.SaveChangesAsync();
                 }
+
 
                 return Ok();
             }

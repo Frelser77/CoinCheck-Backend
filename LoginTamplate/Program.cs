@@ -65,6 +65,8 @@ builder.Services.AddAuthorization();
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
 
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 var app = builder.Build();
 
 // Abilita Swagger solo in ambiente di sviluppo

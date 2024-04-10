@@ -1,5 +1,7 @@
-﻿using LoginTamplate.Model;
+﻿using LoginTamplate.Data;
+using LoginTamplate.Model;
 using LoginTamplate.Model.Dto.Auth;
+using LoginTamplate.Model.Dto.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,12 +17,14 @@ namespace LoginTamplate.Controllers
     {
         private readonly CoinCheckContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         // Utilizza l'iniezione delle dipendenze per passare il contesto e la configurazione
-        public AccountController(CoinCheckContext context, IConfiguration configuration)
+        public AccountController(CoinCheckContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
@@ -116,7 +120,7 @@ namespace LoginTamplate.Controllers
                 return BadRequest("Username is already taken.");
             }
 
-            string defaultProfileImageUrl = "/uploads/profile/placeholder-profile.png\"";
+            string defaultProfileImageUrl = "uploads/profile/placeholder-profile.png\"";
 
             // Crea un nuovo utente con la password hashata usando BCrypt
             Utenti user = new Utenti
@@ -132,30 +136,23 @@ namespace LoginTamplate.Controllers
             _context.Utentis.Add(user);
             await _context.SaveChangesAsync();
 
+            string welcomeMessage = $"Ciao {registerDto.Username},\n\n" +
+                            "Grazie per esserti registrato/a su CoinCheck! " +
+                            "Ora puoi accedere e iniziare ad usare i nostri servizi.\n\n" +
+                            "Cordiali saluti,\nIl team di CoinCheck";
+
+            EmailDto emailDto = new EmailDto
+            {
+                to = registerDto.Email,
+                subject = "Benvenuto/a su CoinCheck!",
+                body = welcomeMessage
+            };
+
+            // Invia l'email in modo asincrono
+            await _emailService.SendEmailAsync(emailDto);
+
             // Ora puoi ritornare solo un messaggio di successo senza token
             return Ok(new { message = "User registered successfully" });
         }
-
-        //metodo per registrare l'attività di logout
-        //[HttpPost("logout")]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    Ottenere l'ID utente dal token JWT
-        //    int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-        //    Registra l'attività di logout
-        //    LogAttivitum logAttivita = new LogAttivitum
-        //    {
-        //        UserId = userId,
-        //        Timestamp = DateTime.UtcNow,
-        //        Azione = "Logout"
-        //    };
-
-        //    _context.LogAttivita.Add(logAttivita);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(new { message = "Logout successful" });
-        //}
-
     }
 }

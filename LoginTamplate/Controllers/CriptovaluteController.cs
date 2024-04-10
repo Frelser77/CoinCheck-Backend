@@ -79,7 +79,13 @@ namespace LoginTamplate.Controllers
                 // Se la preferenza esiste, la rimuoviamo
                 _context.PreferenzeUtentes.Remove(preferenzaEsistente);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Preferenza rimossa" });
+                return Ok(new
+                {
+                    action = "removed",
+                    message = "Preferenza rimossa",
+                    criptoId = cripto.CriptoId,
+                    userId = utente.UserId
+                });
             }
             else
             {
@@ -88,16 +94,23 @@ namespace LoginTamplate.Controllers
                 {
                     UserId = utente.UserId,
                     CriptoId = cripto.CriptoId,
-                    // Imposta i valori di default o basati su input
                     NotificaSogliaPrezzo = false,
                     SogliaPrezzo = null
                 };
 
                 _context.PreferenzeUtentes.Add(nuovaPreferenza);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Preferenza aggiunta" });
+                return Ok(new
+                {
+                    action = "added",
+                    message = "Preferenza aggiunta",
+                    criptoId = cripto.CriptoId,
+                    userId = utente.UserId
+                });
             }
         }
+
+
         [HttpGet("preferenzeUtente/{userId}")]
         public async Task<ActionResult<IEnumerable<PreferenzeUtenteDto>>> GetPreferenzeUtente(int userId)
         {
