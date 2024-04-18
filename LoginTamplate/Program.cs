@@ -1,18 +1,27 @@
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using LoginTamplate.Data;
 using LoginTamplate.Model;
+using LoginTamplate.ModelBinder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Stripe;
+using System.Globalization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Aggiungi servizi al container.
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers(options =>
 {
-    options.JsonSerializerOptions.ReferenceHandler = null; // Disabilita i riferimenti
+    // This will insert your custom model binder at the start of the collection
+    options.ModelBinderProviders.Insert(0, new CustomModelBinderProvider());
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = null;
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
@@ -67,7 +76,26 @@ StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretK
 
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+
+var credentialPath = builder.Configuration["GoogleCloud:CredentialsPath"];
+var credential = GoogleCredential.FromFile(credentialPath);
+builder.Services.AddSingleton(sp => StorageClient.Create(credential));
+builder.Services.AddSingleton(sp => UrlSigner.FromServiceAccountPath(credentialPath));
+
+var supportedCultures = new[] { "it-IT" };
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("it-IT");
+    options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+    options.SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+});
+
+
 var app = builder.Build();
+
+// Configurazione middleware per la localizzazione
+app.UseRequestLocalization();
 
 // Abilita Swagger solo in ambiente di sviluppo
 if (app.Environment.IsDevelopment())

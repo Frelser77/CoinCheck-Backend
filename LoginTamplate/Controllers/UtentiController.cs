@@ -43,17 +43,6 @@ namespace LoginTamplate.Controllers
             Comments = u.Comments.Select(c => c.Content),
             LogAttivita = u.LogAttivita.Select(la => la.Timestamp.ToString()),
             Posts = u.Posts.Select(p => p.Title),
-            //PreferenzeUtentes = u.PreferenzeUtentes.Select(pu => new PreferenzeUtenteDto
-            //{
-            //    CriptoId = pu.CriptoId,
-            //    NotificaSogliaPrezzo = pu.NotificaSogliaPrezzo,
-            //    SogliaPrezzo = pu.SogliaPrezzo,
-            //    NomeCoin = pu.Cripto.Nome,
-            //    SimboloCoin = pu.Cripto.Simbolo,
-            //    PrezzoUsd = pu.Cripto.PrezzoUsd,
-            //    Variazione24h = pu.Cripto.Variazione24h,
-            //    Volume24h = pu.Cripto.Volume24h
-            //}).ToList()
         })
         .ToListAsync();
 
@@ -77,17 +66,6 @@ namespace LoginTamplate.Controllers
                     LogAttivita = u.LogAttivita.Select(l => l.Timestamp.ToString()),
                     Posts = u.Posts.Select(p => p.Content),
                     Comments = u.Comments.Select(c => c.Content),
-                    //PreferenzeUtentes = u.PreferenzeUtentes.Select(pu => new PreferenzeUtenteDto
-                    //{
-                    //    CriptoId = pu.CriptoId,
-                    //    NotificaSogliaPrezzo = pu.NotificaSogliaPrezzo,
-                    //    SogliaPrezzo = pu.SogliaPrezzo,
-                    //    NomeCoin = pu.Cripto.Nome,
-                    //    SimboloCoin = pu.Cripto.Simbolo,
-                    //    PrezzoUsd = pu.Cripto.PrezzoUsd,
-                    //    Variazione24h = pu.Cripto.Variazione24h,
-                    //    Volume24h = pu.Cripto.Volume24h
-                    //}).ToList()
                 })
                 .FirstOrDefaultAsync();
 
@@ -116,10 +94,10 @@ namespace LoginTamplate.Controllers
             {
                 utenteToUpdate.Username = utenteDto.Username;
             }
-            if (utenteDto.Email != null)
-            {
-                utenteToUpdate.Email = utenteDto.Email;
-            }
+            //if (utenteDto.Email != null)
+            //{
+            //    utenteToUpdate.Email = utenteDto.Email;
+            //}
 
             // IsActive è un booleano, quindi è sicuro aggiornarlo direttamente
             utenteToUpdate.IsActive = utenteDto.IsActive;

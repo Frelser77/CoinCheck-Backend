@@ -31,6 +31,8 @@ public partial class Utenti
 
     public virtual ICollection<LogAttivitum> LogAttivita { get; set; } = new List<LogAttivitum>();
 
+    public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
+
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public virtual ICollection<PreferenzeUtente> PreferenzeUtentes { get; set; } = new List<PreferenzeUtente>();

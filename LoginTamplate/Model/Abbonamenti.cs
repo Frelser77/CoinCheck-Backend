@@ -1,4 +1,7 @@
-﻿namespace LoginTamplate.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace LoginTamplate.Model;
 
 public partial class Abbonamenti
 {

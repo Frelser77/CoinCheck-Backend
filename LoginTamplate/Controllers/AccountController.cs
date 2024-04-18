@@ -120,8 +120,12 @@ namespace LoginTamplate.Controllers
                 return BadRequest("Username is already taken.");
             }
 
-            string defaultProfileImageUrl = "uploads/profile/placeholder-profile.png\"";
+            if (await _context.Utentis.AnyAsync(u => u.Email == registerDto.Email))
+            {
+                return BadRequest("Email is already taken.");
+            }
 
+            string defaultProfileImageUrl = "uploads/profile/placeholder-profile.png";
             // Crea un nuovo utente con la password hashata usando BCrypt
             Utenti user = new Utenti
             {
@@ -136,10 +140,25 @@ namespace LoginTamplate.Controllers
             _context.Utentis.Add(user);
             await _context.SaveChangesAsync();
 
-            string welcomeMessage = $"Ciao {registerDto.Username},\n\n" +
-                            "Grazie per esserti registrato/a su CoinCheck! " +
-                            "Ora puoi accedere e iniziare ad usare i nostri servizi.\n\n" +
-                            "Cordiali saluti,\nIl team di CoinCheck";
+            string welcomeMessage = $@"
+                                <html>
+                                <head>
+                                    <style>
+                                        body {{ font-family: 'Arial', sans-serif; }}
+                                        .welcome-message {{ padding: 20px; background-color: #f0f0f0; border-radius: 5px; }}
+                                        .header {{ color: #333366; }}
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class='welcome-message'>
+                                        <h2 class='header'>Ciao {registerDto.Username},</h2>
+                                        <p>Grazie per esserti registrato/a su CoinCheck! Ora puoi accedere e iniziare ad usare i nostri servizi.</p>
+                                        <p>Cordiali saluti,</p>
+                                        <p>Il team di CoinCheck</p>
+                                    </div>
+                                </body>
+                                </html>
+                                ";
 
             EmailDto emailDto = new EmailDto
             {
@@ -151,7 +170,7 @@ namespace LoginTamplate.Controllers
             // Invia l'email in modo asincrono
             await _emailService.SendEmailAsync(emailDto);
 
-            // Ora puoi ritornare solo un messaggio di successo senza token
+
             return Ok(new { message = "User registered successfully" });
         }
     }

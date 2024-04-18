@@ -27,6 +27,8 @@ public partial class CoinCheckContext : DbContext
 
     public virtual DbSet<LogAttivitum> LogAttivita { get; set; }
 
+    public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+
     public virtual DbSet<Post> Posts { get; set; }
 
     public virtual DbSet<PreferenzeUtente> PreferenzeUtentes { get; set; }
@@ -145,6 +147,21 @@ public partial class CoinCheckContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__LogAttivi__UserI__47DBAE45");
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(entity =>
+        {
+            entity.HasKey(e => e.TokenId).HasName("PK__Password__658FEEEAFBE7ECA5");
+
+            entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
+            entity.Property(e => e.Token)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.User).WithMany(p => p.PasswordResetTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__PasswordR__UserI__2BFE89A6");
         });
 
         modelBuilder.Entity<Post>(entity =>
